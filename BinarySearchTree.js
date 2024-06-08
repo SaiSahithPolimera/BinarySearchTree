@@ -35,31 +35,84 @@ const Tree = (arr) => {
   let root = buildTree(arr);
 
   const insert = (value) => {
-    const node = Node(value);
-    if (root == null) {
-      return node;
-    } else {
-      let rt = root;
+    let rt = root;
+    if (!checkDuplicate(rt, value)) {
+      const node = Node(value);
       while (rt != null) {
-        if (value < rt.data) {
-          if (rt.left == null) {
-            rt.data = value;
+        if (value > rt.data) {
+          if (rt.left === null) {
+            rt.left = node;
             rt = null;
           } else {
             rt = rt.left;
           }
         } else {
-          if (rt.right == null) {
+          if (rt.right === null) {
+            rt.right = node;
             rt = null;
-            rt.data = value;
           } else {
             rt = rt.right;
           }
         }
       }
+    } else {
+      console.log("Cannot insert duplicates!");
+      return;
     }
   };
-  return { insert, prettyPrint, root };
+
+  const deleteItem = (value) => {
+    let rt = root;
+    const minValue = (node) => {
+      let minVal = node.data;
+      while (node.left !== null) {
+        minVal = node.left.data;
+        console.log(minVal);
+        node = node.left;
+      }
+      return minVal;
+    }
+    const deleteNode = (rt, value) => {
+      if (rt === null) {
+        return rt;
+      }
+      if (value < rt.data) {
+        rt.left = deleteNode(rt.left, value);
+      } else if (value > rt.data) {
+        rt.right = deleteNode(rt.right, value);
+      } else {
+        if (rt.left === null) {
+          return rt.right;
+        } else if (rt.right === null) {
+          return rt.left;
+        }
+        rt.data = minValue(rt.right);
+        rt.right = deleteNode(rt.right, rt.data);
+      }
+      return rt;
+    };
+
+    return deleteNode(rt, value);
+  };
+
+  const checkDuplicate = (rt, value) => {
+    let isDuplicate = false;
+    while (rt != null) {
+      if (rt.data === value) {
+        rt = null;
+        isDuplicate = true;
+      } else {
+        if (value > rt.data) {
+          rt = rt.left;
+        } else {
+          rt = rt.right;
+        }
+      }
+    }
+    return isDuplicate;
+  };
+
+  return { insert, prettyPrint, root, deleteItem };
 };
 
 let ar = [41, 3, 44, 12, 99, 1, 2, 4, 5, 6, 7, 9, 9, 2, 3, 4, 1, 1];
@@ -69,6 +122,5 @@ function onlyUniqueIndex(a, index, ar) {
 }
 
 const tr = Tree(ar);
-tr.prettyPrint(tr.root);
-tr.insert(13, tr.root);
+
 tr.prettyPrint(tr.root);
