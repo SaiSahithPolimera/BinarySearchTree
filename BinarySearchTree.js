@@ -1,3 +1,5 @@
+const { log } = require("console");
+
 const Node = (data) => {
   return { left: null, data: data, right: null };
 };
@@ -61,17 +63,44 @@ const Tree = (arr) => {
     }
   };
 
+  const levelOrder = (callback) => {
+    let rt = root;
+    if (rt === null) {
+      return;
+    }
+    let Queue = [];
+    let currentNode;
+    Queue.push(rt);
+    let levelOrder = [];
+    while (Queue.length > 0) {
+      currentNode = Queue[0];
+      levelOrder.push(currentNode.data);
+      if (currentNode.left !== null) {
+        Queue.push(currentNode.left);
+      }
+      if (currentNode.right !== null) {
+        Queue.push(currentNode.right);
+      }
+      Queue.shift();
+    }
+    if (callback && typeof callback === "function") {
+      levelOrder.forEach((element) => {
+        callback(element);
+      });
+    }
+    return levelOrder;
+  };
+
   const deleteItem = (value) => {
     let rt = root;
     const minValue = (node) => {
       let minVal = node.data;
       while (node.left !== null) {
         minVal = node.left.data;
-        console.log(minVal);
         node = node.left;
       }
       return minVal;
-    }
+    };
     const deleteNode = (rt, value) => {
       if (rt === null) {
         return rt;
@@ -112,15 +141,199 @@ const Tree = (arr) => {
     return isDuplicate;
   };
 
-  return { insert, prettyPrint, root, deleteItem };
+  const inOrder = (callback) => {
+    let inOrderAr = [];
+    let rt = root;
+    const helper = (rt) => {
+      if (rt !== null) {
+        helper(rt.left);
+        inOrderAr.push(rt.data);
+        helper(rt.right);
+      }
+    };
+    if (callback && typeof callback === "function") {
+      inOrderAr.forEach((element) => {
+        callback(element);
+      });
+    }
+    helper(rt);
+    return inOrderAr;
+  };
+
+  const preOrder = (callback) => {
+    let preOrderAr = [];
+    let rt = root;
+    const helper = (rt) => {
+      if (rt !== null) {
+        preOrderAr.push(rt.data);
+        helper(rt.left);
+        helper(rt.right);
+      }
+    };
+    if (callback && typeof callback === "function") {
+      preOrderAr.forEach((element) => {
+        callback(element);
+      });
+    }
+    helper(rt);
+    return preOrderAr;
+  };
+
+  const height = (root, node) => {
+    if (root === null) {
+      return -1;
+    }
+    let leftHeight = height(root.left, node);
+    let rightHeight = height(root.right, node);
+    let ans = Math.max(leftHeight, rightHeight) + 1;
+    if (root.data === node) {
+      h = ans;
+    }
+    return ans;
+  };
+
+  const depth = (root, value) => {
+    if (root === null) {
+      return -1;
+    }
+    let dist = -1;
+    if (
+      root.data === value ||
+      (dist = depth(root.left, value) >= 0) ||
+      (dist = depth(root.left, value) >= 0)
+    ) {
+      return dist + 1;
+    }
+    return dist;
+  };
+
+  const isBalanced = () => {
+    let rt = root;
+    const dfs = (root) => {
+      if (root === null) {
+        return 0;
+      }
+      const leftHeight = dfs(root.left);
+      if (leftHeight === -1) {
+        return -1;
+      }
+      const rightHeight = dfs(root.right);
+      if (rightHeight === -1) {
+        return -1;
+      }
+
+      if (Math.abs(leftHeight - rightHeight) > 1) {
+        return -1;
+      }
+      return Math.max(leftHeight, rightHeight) + 1;
+    };
+    let Balanced = dfs(rt) === -1 ? false : true;
+    return Balanced;
+  };
+
+  const postOrder = (callback) => {
+    let postOrderAr = [];
+    let rt = root;
+    const helper = (rt) => {
+      if (rt !== null) {
+        helper(rt.left);
+        helper(rt.right);
+        postOrderAr.push(rt.data);
+      }
+    };
+    if (callback && typeof callback === "function") {
+      postOrderAr.forEach((element) => {
+        callback(element);
+      });
+    }
+    helper(rt);
+    return postOrderAr;
+  };
+
+  const findValue = (value) => {
+    let rt = root;
+    while (rt !== null) {
+      if (value === rt.data) {
+        return rt;
+      }
+      if (value > rt.data) {
+        rt = rt.right;
+      } else {
+        rt = rt.left;
+      }
+    }
+  };
+
+  const reBalance = () => {
+    let treeData = inOrder();
+    let currentAr = arr;
+    arr = arr.filter(onlyUniqueIndex).sort((a, b) => a - b);
+    treeData.forEach((element) => {
+      if (!arr.includes(element)) {
+        arr.push(element);
+      }
+    });
+    root = buildTree(arr);
+    return root;
+  };
+
+  return {
+    insert,
+    prettyPrint,
+    root,
+    deleteItem,
+    findValue,
+    levelOrder,
+    inOrder,
+    preOrder,
+    postOrder,
+    height,
+    depth,
+    isBalanced,
+    reBalance,
+  };
 };
 
-let ar = [41, 3, 44, 12, 99, 1, 2, 4, 5, 6, 7, 9, 9, 2, 3, 4, 1, 1];
+
+const createRandomArray = () => {
+  let arr = [];
+  arr.length = Math.floor(Math.random() * 100);
+  for (let index = 0; index < arr.length; index++) {
+    let num = Math.floor(Math.random() * 100);
+    arr[index] = num;
+  }
+  return arr;
+};
 
 function onlyUniqueIndex(a, index, ar) {
   return ar.indexOf(a) === index;
 }
 
+let ar = createRandomArray();
 const tr = Tree(ar);
-
 tr.prettyPrint(tr.root);
+console.log("Is Balanced: " + tr.isBalanced());
+console.log("Level Order Traversal: " + tr.levelOrder());
+console.log("PreOrder Traversal: " + tr.preOrder());
+console.log("PostOrder Order Traversal: " + tr.postOrder());
+console.log("InOrder Order Traversal: " + tr.inOrder());
+console.log("Inserting 33")
+tr.insert(33);
+tr.prettyPrint(tr.root);
+console.log("Inserting 69")
+tr.insert(69);
+tr.prettyPrint(tr.root);
+console.log("Inserting 92")
+tr.insert(92);
+console.log("Inserting 22")
+tr.prettyPrint(tr.root);
+tr.insert(22);
+tr.prettyPrint(tr.root);
+console.log("Is Balanced: " + tr.isBalanced());
+tr.root = tr.reBalance();
+tr.prettyPrint(tr.root);
+console.log("Is Balanced: " + tr.isBalanced());
+console.log("Level Order Traversal: " + tr.levelOrder());
+console.log("PreOrder Traversal: " + tr.preOrder());
+console.log("PostOrder Order Traversal: " + tr.postOrder());
+console.log("InOrder Order Traversal: " + tr.inOrder());
